@@ -366,8 +366,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Game\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1094
-    y: -1001
+    x: 894
+    y: 24
     width: 468
     height: 668
   m_SerializedDataModeController:
@@ -595,8 +595,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 201
-    y: -1001
+    x: 1
+    y: 24
     width: 891
     height: 668
   m_SerializedDataModeController:
@@ -1297,8 +1297,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Project\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 201
-    y: -307
+    x: 1
+    y: 718
     width: 1361
     height: 213
   m_SerializedDataModeController:
@@ -1342,7 +1342,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 35}
     m_SelectedIDs: 50160100
     m_LastClickedID: 71248
-    m_ExpandedIDs: 000000004a1501004c1501004e150100501501005215010054150100
+    m_ExpandedIDs: 000000002a7c01002c7c01002e7c0100307c0100327c0100347c0100
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1371,7 +1371,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000004a1501004c1501004e150100501501005215010054150100
+    m_ExpandedIDs: 000000002a7c01002c7c01002e7c0100307c0100327c0100347c0100
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1450,8 +1450,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Hierarchy\u200B"
   m_Pos:
     serializedVersion: 2
-    x: -357
-    y: -1001
+    x: 0
+    y: 24
     width: 253
     height: 907
   m_SerializedDataModeController:
@@ -1468,7 +1468,7 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 6623ffff
+      m_SelectedIDs: 
       m_LastClickedID: 0
       m_ExpandedIDs: 7867ffff
       m_RenameOverlay:
@@ -1516,8 +1516,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: -103
-    y: -1001
+    x: 255
+    y: 24
     width: 302
     height: 907
   m_SerializedDataModeController:
