@@ -7,131 +7,122 @@ using UnityEditor;
 
 public class SextantInputHandler : MonoBehaviour
 {
-    [Header("Dependencies")]
-    public ScreenSextantDetector sextantDetector;
+    #region Constantes
+
+    private const int ALLOWED_SEXTANT = 2;
+
+    #endregion
+
+    #region Referencias SerializedField Privadas
 
     [Header("UI Anchors for Image")]
-    [SerializeField] private Canvas _anchorCanvas;
-    [SerializeField] private RectTransform _anchorContainer;
-    [SerializeField] private Image _anchorImage;
+    [SerializeField] 
+    private Canvas _anchorCanvas;
+    [SerializeField] 
+    private RectTransform _anchorContainer;
+    [SerializeField] 
+    private Image _anchorImage;
 
-    [Header("Drag State")]
-    public float LastDragLength { get; private set; } = 0f;
+    [Header("Line Renderers")]
+    [SerializeField] 
+    private LineRenderer _lineRenderer;
+    [SerializeField] 
+    private LineRenderer _extensionLineRenderer;
 
-    [SerializeField]
-    private LineRenderer lineRenderer;
-    private bool isDragging = false;
-    private Vector3 dragStartWorldPos;
+    #endregion
 
-    private const int AllowedSextant = 2;
+    #region Variables Privadas
 
-    [SerializeField]
-    private LineRenderer extensionLineRenderer;
-    private Vector3 frozenEndPoint;
-    private bool isFrozen = false;
-    private int activeSextant = -1;
+    private ScreenSextantDetector _sextantDetector;
 
-    private bool freezeLength = false;
+    private bool _isDragging = false;
+    private bool _isFrozen = false;
 
-    // Screen Y coordinate of the image's top border
+    private Vector3 _dragStartWorldPos;
+    private Vector3 _frozenEndPoint;
+
     private float _imageTopScreenY;
 
-    // To track if we've crossed the image top line
-    private bool _isLengthFrozen = false;
+    #endregion
 
-    // Side of start drag relative to image top line: true if start below line, false if above
-    private bool _startedBelowLine;
+    #region Propiedades Públicas
+
+    public float LastDragLength { get; private set; } = 0f;
+
+    #endregion
+
+    #region Unity Methods
+
+    private void Awake()
+    {
+        _sextantDetector = GetComponent<ScreenSextantDetector>();
+
+        _lineRenderer.positionCount = 2;
+        _lineRenderer.enabled = false;
+
+        _extensionLineRenderer.positionCount = 2;
+        _extensionLineRenderer.enabled = false;
+    }
 
     private void Start()
     {
-        if (sextantDetector != null && _anchorCanvas != null && _anchorContainer != null)
+        if (_sextantDetector != null && _anchorCanvas != null && _anchorContainer != null)
         {
-            sextantDetector.AlignToSextant(6, _anchorCanvas, _anchorContainer);
+            _sextantDetector.AlignToSextant(6, _anchorCanvas, _anchorContainer);
         }
 
         CalculateImageTopScreenY();
-
-        // Configura el extensionLineRenderer para que tenga 2 posiciones y esté oculto al inicio
-        extensionLineRenderer.positionCount = 2;
-        extensionLineRenderer.enabled = false;
     }
 
-    private void CalculateImageTopScreenY()
+    private void OnEnable()
     {
-        if (_anchorImage == null) return;
-
-        // Get world corners of the Image's RectTransform (4 corners: BL, TL, TR, BR)
-        Vector3[] corners = new Vector3[4];
-        _anchorImage.rectTransform.GetWorldCorners(corners);
-
-        // Top left corner (index 1) world position
-        Vector3 topLeftWorld = corners[1];
-
-        // Convert to screen position
-        Vector3 topLeftScreen = RectTransformUtility.WorldToScreenPoint(null, topLeftWorld);
-
-        _imageTopScreenY = topLeftScreen.y;
-
-        Debug.Log($"Image top border screen Y position: {_imageTopScreenY}");
-    }
-
-    void Awake()
-    {
-        sextantDetector = GetComponent<ScreenSextantDetector>();
-        lineRenderer.positionCount = 2;
-        lineRenderer.enabled = false;
-    }
-
-    void OnEnable()
-    {
-        if (sextantDetector != null)
+        if (_sextantDetector != null)
         {
-            sextantDetector.OnSextantTouched += HandleTouchDetected;
-            sextantDetector.OnSextantDragged += HandleDragDetected;
+            _sextantDetector.OnSextantTouched += HandleTouchDetected;
+            _sextantDetector.OnSextantDragged += HandleDragDetected;
         }
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        if (sextantDetector != null)
+        if (_sextantDetector != null)
         {
-            sextantDetector.OnSextantTouched -= HandleTouchDetected;
-            sextantDetector.OnSextantDragged -= HandleDragDetected;
+            _sextantDetector.OnSextantTouched -= HandleTouchDetected;
+            _sextantDetector.OnSextantDragged -= HandleDragDetected;
         }
 
         StopDrag();
     }
 
-    void Update()
+    private void Update()
     {
-        if (isDragging)
+        if (_isDragging)
         {
             Vector3 currentWorldPos = GetInputWorldPosition();
 
-            // Obtener la Y de input en pantalla
             float inputScreenY = Input.touchCount > 0 ? Input.GetTouch(0).position.y : Input.mousePosition.y;
 
-            if (!isFrozen)
+            if (!_isFrozen)
             {
                 if (inputScreenY >= _imageTopScreenY)
                 {
                     // Arriba del límite, actualización normal
-                    UpdateLine(dragStartWorldPos, currentWorldPos);
-                    LastDragLength = Vector3.Distance(dragStartWorldPos, currentWorldPos);
-                    extensionLineRenderer.enabled = false;
+                    UpdateLine(_dragStartWorldPos, currentWorldPos);
+                    LastDragLength = Vector3.Distance(_dragStartWorldPos, currentWorldPos);
+                    _extensionLineRenderer.enabled = false;
                 }
                 else
                 {
                     // Cruzó hacia abajo, congelar línea principal, activar extensión
-                    isFrozen = true;
+                    _isFrozen = true;
 
-                    frozenEndPoint = CalculateIntersectionPoint(dragStartWorldPos, currentWorldPos);
+                    _frozenEndPoint = CalculateIntersectionPoint(_dragStartWorldPos, currentWorldPos);
 
-                    UpdateLine(dragStartWorldPos, frozenEndPoint);
+                    UpdateLine(_dragStartWorldPos, _frozenEndPoint);
 
-                    extensionLineRenderer.enabled = true;
-                    extensionLineRenderer.SetPosition(0, frozenEndPoint);
-                    extensionLineRenderer.SetPosition(1, currentWorldPos);
+                    _extensionLineRenderer.enabled = true;
+                    _extensionLineRenderer.SetPosition(0, _frozenEndPoint);
+                    _extensionLineRenderer.SetPosition(1, currentWorldPos);
                 }
             }
             else
@@ -139,16 +130,16 @@ public class SextantInputHandler : MonoBehaviour
                 if (inputScreenY >= _imageTopScreenY)
                 {
                     // Regresó arriba, desactivar extensión, reactivar principal
-                    isFrozen = false;
-                    extensionLineRenderer.enabled = false;
-                    UpdateLine(dragStartWorldPos, currentWorldPos);
-                    LastDragLength = Vector3.Distance(dragStartWorldPos, currentWorldPos);
+                    _isFrozen = false;
+                    _extensionLineRenderer.enabled = false;
+                    UpdateLine(_dragStartWorldPos, currentWorldPos);
+                    LastDragLength = Vector3.Distance(_dragStartWorldPos, currentWorldPos);
                 }
                 else
                 {
                     // Sigue abajo, actualizar extensión
-                    extensionLineRenderer.SetPosition(0, frozenEndPoint);
-                    extensionLineRenderer.SetPosition(1, currentWorldPos);
+                    _extensionLineRenderer.SetPosition(0, _frozenEndPoint);
+                    _extensionLineRenderer.SetPosition(1, currentWorldPos);
                 }
             }
 
@@ -159,105 +150,15 @@ public class SextantInputHandler : MonoBehaviour
         }
     }
 
-    private Vector3 CalculateIntersectionPoint(Vector3 start, Vector3 end)
-    {
-        // Convertir el Y de la línea límite a world Y en el plano de la cámara (nearClipPlane + 1)
-        float yWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, _imageTopScreenY, Camera.main.nearClipPlane + 1)).y;
-
-        // La línea es entre start y end, vamos a calcular la intersección en Y = yWorld
-        Vector3 direction = end - start;
-
-        if (Mathf.Approximately(direction.y, 0f))
-        {
-            // Línea horizontal, retorna start o end (no cruza)
-            return start;
-        }
-
-        float t = (yWorld - start.y) / direction.y;
-        t = Mathf.Clamp01(t); // para estar seguros que sea entre start y end
-
-        return start + direction * t;
-    }
-
-    void HandleTouchDetected(int sextant)
-    {
-        Debug.Log($"Touch detected in sextant {sextant}");
-
-        if (sextant == AllowedSextant)
-        {
-            dragStartWorldPos = GetInputWorldPosition();
-
-            // Determine if drag started below or above the image top line
-            Vector3 startScreenPos = Input.touchCount > 0
-                ? (Vector3)Input.GetTouch(0).position
-                : Input.mousePosition;
-            _startedBelowLine = startScreenPos.y < _imageTopScreenY;
-
-            _isLengthFrozen = false;
-
-            StartDrag();
-        }
-        else
-        {
-            Debug.Log($"Drag is DISABLED in Sextant {sextant}");
-        }
-    }
-
-    void HandleDragDetected(int sextant)
-    {
-        // Placeholder for future drag logic if needed
-    }
-
-    void StartDrag()
-    {
-        isDragging = true;
-        lineRenderer.enabled = true;
-        lineRenderer.SetPosition(0, dragStartWorldPos);
-        lineRenderer.SetPosition(1, dragStartWorldPos);
-        LastDragLength = 0f;
-
-        Debug.Log("Drag started in Sextant 2");
-    }
-
-    void StopDrag()
-    {
-        isDragging = false;
-        freezeLength = false;
-        isFrozen = false;
-        lineRenderer.enabled = false;
-        extensionLineRenderer.enabled = false;
-        activeSextant = -1;
-    }
-
-    void UpdateLine(Vector3 start, Vector3 end)
-    {
-        lineRenderer.SetPosition(0, start);
-        lineRenderer.SetPosition(1, end);
-    }
-
-    Vector3 GetInputWorldPosition()
-    {
-        Vector3 inputPos = Input.touchCount > 0
-            ? (Vector3)Input.GetTouch(0).position
-            : Input.mousePosition;
-
-        Camera cam = Camera.main;
-        return cam != null
-            ? cam.ScreenToWorldPoint(new Vector3(inputPos.x, inputPos.y, cam.nearClipPlane + 1))
-            : Vector3.zero;
-    }
-
 #if UNITY_EDITOR
-    void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
         if (!Application.isPlaying || _anchorImage == null || _anchorContainer == null || Camera.main == null)
             return;
 
-        // Solo dibujamos la línea límite si ya calculamos la posición de la imagen
         if (_imageTopScreenY <= 0f)
             return;
 
-        // Convertir el screen Y de la línea a world points en X min y X max (bordes de pantalla)
         Vector3 leftScreenPoint = new Vector3(0, _imageTopScreenY, Camera.main.nearClipPlane + 1);
         Vector3 rightScreenPoint = new Vector3(Screen.width, _imageTopScreenY, Camera.main.nearClipPlane + 1);
 
@@ -267,11 +168,10 @@ public class SextantInputHandler : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawLine(leftWorldPoint, rightWorldPoint);
 
-        // Opcional: también dibujar la línea del drag y etiqueta si está activo
-        if (isDragging && lineRenderer.enabled && lineRenderer.positionCount >= 2)
+        if (_isDragging && _lineRenderer.enabled && _lineRenderer.positionCount >= 2)
         {
-            Vector3 startPos = lineRenderer.GetPosition(0);
-            Vector3 endPos = lineRenderer.GetPosition(1);
+            Vector3 startPos = _lineRenderer.GetPosition(0);
+            Vector3 endPos = _lineRenderer.GetPosition(1);
             Gizmos.color = Color.green;
             Gizmos.DrawLine(startPos, endPos);
 
@@ -280,4 +180,82 @@ public class SextantInputHandler : MonoBehaviour
         }
     }
 #endif
+
+    #endregion
+
+    #region Métodos Privados
+
+    private void CalculateImageTopScreenY()
+    {
+        if (_anchorImage == null) return;
+
+        Vector3[] corners = new Vector3[4];
+        _anchorImage.rectTransform.GetWorldCorners(corners);
+
+        Vector3 topLeftWorld = corners[1];
+        Vector3 topLeftScreen = RectTransformUtility.WorldToScreenPoint(null, topLeftWorld);
+
+        _imageTopScreenY = topLeftScreen.y;
+    }
+
+    private Vector3 GetInputWorldPosition()
+    {
+        Vector3 inputPos = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
+
+        Camera cam = Camera.main;
+        return cam != null ? cam.ScreenToWorldPoint(new Vector3(inputPos.x, inputPos.y, cam.nearClipPlane + 1)) : Vector3.zero;
+    }
+
+    private void UpdateLine(Vector3 start, Vector3 end)
+    {
+        _lineRenderer.SetPosition(0, start);
+        _lineRenderer.SetPosition(1, end);
+    }
+
+    private Vector3 CalculateIntersectionPoint(Vector3 start, Vector3 end)
+    {
+        float yWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, _imageTopScreenY, Camera.main.nearClipPlane + 1)).y;
+
+        Vector3 direction = end - start;
+
+        if (Mathf.Approximately(direction.y, 0f))
+            return start;
+
+        float t = (yWorld - start.y) / direction.y;
+        t = Mathf.Clamp01(t);
+
+        return start + direction * t;
+    }
+
+    private void HandleTouchDetected(int sextant)
+    {
+        if (sextant == ALLOWED_SEXTANT)
+        {
+            _dragStartWorldPos = GetInputWorldPosition();
+
+            Vector3 startScreenPos = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
+            _isFrozen = false;
+
+            _isDragging = true;
+            _lineRenderer.enabled = true;
+            _lineRenderer.SetPosition(0, _dragStartWorldPos);
+            _lineRenderer.SetPosition(1, _dragStartWorldPos);
+            LastDragLength = 0f;
+        }
+    }
+
+    private void HandleDragDetected(int sextant)
+    {
+        // Puede agregarse lógica adicional si se requiere
+    }
+
+    private void StopDrag()
+    {
+        _isDragging = false;
+        _isFrozen = false;
+        _lineRenderer.enabled = false;
+        _extensionLineRenderer.enabled = false;
+    }
+
+    #endregion
 }

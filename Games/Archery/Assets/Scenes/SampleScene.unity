@@ -1733,7 +1733,6 @@ GameObject:
   - component: {fileID: 1233718193}
   - component: {fileID: 1233718192}
   - component: {fileID: 1233718190}
-  - component: {fileID: 1233718194}
   m_Layer: 0
   m_Name: TouchManager
   m_TagString: Untagged
@@ -1753,12 +1752,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b5a3929ec1a94d4fa68ff70845b0939, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sextantDetector: {fileID: 0}
   _anchorCanvas: {fileID: 364688425}
   _anchorContainer: {fileID: 949232764}
   _anchorImage: {fileID: 343948808}
-  lineRenderer: {fileID: 1508043633}
-  extensionLineRenderer: {fileID: 2114593172}
+  _lineRenderer: {fileID: 1508043633}
+  _extensionLineRenderer: {fileID: 2114593172}
 --- !u!114 &1233718192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1815,23 +1813,6 @@ Transform:
   - {fileID: 2114593173}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1233718194
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1233718189}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2cf7a6a0108beb469dd3839bb344ed7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _screenSextanDetector: {fileID: 0}
-  _anchorCanvas: {fileID: 364688425}
-  _anchorContainer: {fileID: 949232764}
-  _centerOnSextant: 1
-  _sextantPosition: 6
 --- !u!1001 &1264397755
 PrefabInstance:
   m_ObjectHideFlags: 0
