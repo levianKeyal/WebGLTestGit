@@ -3,11 +3,15 @@
   "WorkspaceRootPath": "D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{EF5A1A13-DF17-BF6D-4824-ECB581C5ECA1}|Assembly-CSharp.csproj|d:\\roly\\unity git proyects\\webgltestgit\\games\\archery\\assets\\scripts\\roly scripts\\anchorzone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EF5A1A13-DF17-BF6D-4824-ECB581C5ECA1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\roly scripts\\anchorzone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EF5A1A13-DF17-BF6D-4824-ECB581C5ECA1}|Assembly-CSharp.csproj|d:\\roly\\unity git proyects\\webgltestgit\\games\\archery\\assets\\scripts\\roly scripts\\sextantinputhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EF5A1A13-DF17-BF6D-4824-ECB581C5ECA1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\roly scripts\\sextantinputhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EF5A1A13-DF17-BF6D-4824-ECB581C5ECA1}|Assembly-CSharp.csproj|d:\\roly\\unity git proyects\\webgltestgit\\games\\archery\\assets\\scripts\\roly scripts\\screensextantdetector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{EF5A1A13-DF17-BF6D-4824-ECB581C5ECA1}|Assembly-CSharp.csproj|D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\assets\\scripts\\roly scripts\\screensextantdetector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EF5A1A13-DF17-BF6D-4824-ECB581C5ECA1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\roly scripts\\screensextantdetector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -23,28 +27,40 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "AnchorZone.cs",
+              "DocumentMoniker": "D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\Assets\\Scripts\\Roly Scripts\\AnchorZone.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Roly Scripts\\AnchorZone.cs",
+              "ToolTip": "D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\Assets\\Scripts\\Roly Scripts\\AnchorZone.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Roly Scripts\\AnchorZone.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-24T16:58:44.353Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "SextantInputHandler.cs",
               "DocumentMoniker": "D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\Assets\\Scripts\\Roly Scripts\\SextantInputHandler.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Roly Scripts\\SextantInputHandler.cs",
               "ToolTip": "D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\Assets\\Scripts\\Roly Scripts\\SextantInputHandler.cs",
               "RelativeToolTip": "Assets\\Scripts\\Roly Scripts\\SextantInputHandler.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAAD0AAAAAAAAAAADwv0wAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-17T18:19:58.805Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "ScreenSextantDetector.cs",
               "DocumentMoniker": "D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\Assets\\Scripts\\Roly Scripts\\ScreenSextantDetector.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Roly Scripts\\ScreenSextantDetector.cs",
               "ToolTip": "D:\\Roly\\Unity Git Proyects\\WebGLTestGit\\Games\\Archery\\Assets\\Scripts\\Roly Scripts\\ScreenSextantDetector.cs",
               "RelativeToolTip": "Assets\\Scripts\\Roly Scripts\\ScreenSextantDetector.cs",
-              "ViewState": "AgIAAFsAAAAAAAAAAAArwHEAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAL4AAAAAAAAAAAAUwOEAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-17T17:33:49.262Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-17T17:33:49.262Z"
             }
           ]
         }

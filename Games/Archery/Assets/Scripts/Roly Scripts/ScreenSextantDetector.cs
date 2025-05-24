@@ -200,4 +200,28 @@ public class ScreenSextantDetector : MonoBehaviour
             array = newArray;
         }
     }
+    public int GetSextantAtPosition(Vector2 screenPosition)
+    {
+        float screenWidth = Screen.width;
+        float screenHeight = Screen.height;
+
+        // Calculate horizontal divisions
+        float halfWidth = screenWidth / 2f;
+        float sectionHeight = screenHeight / 3f;
+
+        int column = screenPosition.x < halfWidth ? 0 : 1;  // 0 = left, 1 = right
+
+        int row;
+        if (screenPosition.y >= sectionHeight * 2)
+            row = 0;  // top third
+        else if (screenPosition.y >= sectionHeight)
+            row = 1;  // middle third
+        else
+            row = 2;  // bottom third
+
+        // Map to sextant number
+        int sextantIndex = row * 2 + column + 1;
+
+        return sextantIndex;  // Returns 1–6
+    }
 }
