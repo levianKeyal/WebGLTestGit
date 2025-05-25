@@ -16,18 +16,24 @@ public class SextantInputHandler : MonoBehaviour
     #region Referencias SerializedField Privadas
 
     [Header("UI Anchors for Image")]
-    [SerializeField] 
+    [SerializeField]
     private Canvas _anchorCanvas;
-    [SerializeField] 
+    [SerializeField]
     private RectTransform _anchorContainer;
-    [SerializeField] 
+    [SerializeField]
     private Image _anchorImage;
 
     [Header("Line Renderers")]
-    [SerializeField] 
+    [SerializeField]
     private LineRenderer _lineRenderer;
-    [SerializeField] 
+    [SerializeField]
     private LineRenderer _extensionLineRenderer;
+
+    [Header("Debug Values")]
+    [SerializeField, ReadOnly]
+    private float _lastDragLengthSerialized;
+    [SerializeField, ReadOnly]
+    private float _lastExtensionLengthSerialized;
 
     #endregion
 
@@ -43,11 +49,15 @@ public class SextantInputHandler : MonoBehaviour
 
     private float _imageTopScreenY;
 
+    private Vector2 _imageScreenMin;
+    private Vector2 _imageScreenMax;
+
     #endregion
 
     #region Propiedades Públicas
 
     public float LastDragLength { get; private set; } = 0f;
+    public float LastExtensionLength { get; private set; } = 0f;
 
     #endregion
 
@@ -71,7 +81,7 @@ public class SextantInputHandler : MonoBehaviour
             _sextantDetector.AlignToSextant(6, _anchorCanvas, _anchorContainer);
         }
 
-        CalculateImageTopScreenY();
+        CalculateImageScreenArea();
     }
 
     private void OnEnable()
@@ -100,46 +110,64 @@ public class SextantInputHandler : MonoBehaviour
         {
             Vector3 currentWorldPos = GetInputWorldPosition();
 
-            float inputScreenY = Input.touchCount > 0 ? Input.GetTouch(0).position.y : Input.mousePosition.y;
+            // Clamp screen position of the input inside the vertical area
+            Vector2 currentScreenPos = Input.touchCount > 0 ? (Vector2)Input.GetTouch(0).position : (Vector2)Input.mousePosition;
+
+            // Clamp X between image left and right edges
+            float clampedX = Mathf.Clamp(currentScreenPos.x, _imageScreenMin.x, _imageScreenMax.x);
+            // Clamp Y between image top and screen top
+            float clampedY = Mathf.Clamp(currentScreenPos.y, _imageTopScreenY, Screen.height);
+
+            Vector3 clampedScreenPos = new Vector3(clampedX, clampedY, Camera.main.nearClipPlane + 1);
+            Vector3 clampedWorldPos = Camera.main.ScreenToWorldPoint(clampedScreenPos);
+
+            float inputScreenY = currentScreenPos.y;
 
             if (!_isFrozen)
             {
                 if (inputScreenY >= _imageTopScreenY)
                 {
-                    // Arriba del límite, actualización normal
-                    UpdateLine(_dragStartWorldPos, currentWorldPos);
-                    LastDragLength = Vector3.Distance(_dragStartWorldPos, currentWorldPos);
+                    UpdateLine(_dragStartWorldPos, clampedWorldPos);
+                    LastDragLength = Vector3.Distance(_dragStartWorldPos, clampedWorldPos);
+                    _lastDragLengthSerialized = LastDragLength;
                     _extensionLineRenderer.enabled = false;
                 }
                 else
                 {
-                    // Cruzó hacia abajo, congelar línea principal, activar extensión
                     _isFrozen = true;
 
-                    _frozenEndPoint = CalculateIntersectionPoint(_dragStartWorldPos, currentWorldPos);
+                    _frozenEndPoint = CalculateIntersectionPoint(_dragStartWorldPos, clampedWorldPos);
 
                     UpdateLine(_dragStartWorldPos, _frozenEndPoint);
 
                     _extensionLineRenderer.enabled = true;
                     _extensionLineRenderer.SetPosition(0, _frozenEndPoint);
-                    _extensionLineRenderer.SetPosition(1, currentWorldPos);
+                    _extensionLineRenderer.SetPosition(1, clampedWorldPos);
                 }
             }
             else
             {
                 if (inputScreenY >= _imageTopScreenY)
                 {
-                    // Regresó arriba, desactivar extensión, reactivar principal
                     _isFrozen = false;
                     _extensionLineRenderer.enabled = false;
-                    UpdateLine(_dragStartWorldPos, currentWorldPos);
-                    LastDragLength = Vector3.Distance(_dragStartWorldPos, currentWorldPos);
+                    UpdateLine(_dragStartWorldPos, clampedWorldPos);
+                    LastDragLength = Vector3.Distance(_dragStartWorldPos, clampedWorldPos);
                 }
                 else
                 {
-                    // Sigue abajo, actualizar extensión
+                    // Clamp again for extension line inside the image rect
+                    Vector2 clampedExtPos = new Vector2(
+                        Mathf.Clamp(currentScreenPos.x, _imageScreenMin.x, _imageScreenMax.x),
+                        Mathf.Clamp(currentScreenPos.y, _imageScreenMin.y, _imageScreenMax.y)
+                    );
+                    Vector3 clampedExtWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(clampedExtPos.x, clampedExtPos.y, Camera.main.nearClipPlane + 1));
+
                     _extensionLineRenderer.SetPosition(0, _frozenEndPoint);
-                    _extensionLineRenderer.SetPosition(1, currentWorldPos);
+                    _extensionLineRenderer.SetPosition(1, clampedExtWorldPos);
+
+                    LastExtensionLength = Vector3.Distance(_frozenEndPoint, clampedWorldPos);
+                    _lastExtensionLengthSerialized = LastExtensionLength;
                 }
             }
 
@@ -168,6 +196,25 @@ public class SextantInputHandler : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawLine(leftWorldPoint, rightWorldPoint);
 
+        Vector3 bl = Camera.main.ScreenToWorldPoint(new Vector3(_imageScreenMin.x, _imageScreenMin.y, Camera.main.nearClipPlane + 1));
+        Vector3 br = Camera.main.ScreenToWorldPoint(new Vector3(_imageScreenMax.x, _imageScreenMin.y, Camera.main.nearClipPlane + 1));
+        Vector3 tr = Camera.main.ScreenToWorldPoint(new Vector3(_imageScreenMax.x, _imageScreenMax.y, Camera.main.nearClipPlane + 1));
+        Vector3 tl = Camera.main.ScreenToWorldPoint(new Vector3(_imageScreenMin.x, _imageScreenMax.y, Camera.main.nearClipPlane + 1));
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(bl, br);
+        Gizmos.DrawLine(br, tr);
+        Gizmos.DrawLine(tr, tl);
+        Gizmos.DrawLine(tl, bl);
+
+        float screenTopY = Screen.height;
+        Vector3 tlTopWorld = Camera.main.ScreenToWorldPoint(new Vector3(_imageScreenMin.x, screenTopY, Camera.main.nearClipPlane + 1));
+        Vector3 trTopWorld = Camera.main.ScreenToWorldPoint(new Vector3(_imageScreenMax.x, screenTopY, Camera.main.nearClipPlane + 1));
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(tl, tlTopWorld);
+        Gizmos.DrawLine(tr, trTopWorld);
+
         if (_isDragging && _lineRenderer.enabled && _lineRenderer.positionCount >= 2)
         {
             Vector3 startPos = _lineRenderer.GetPosition(0);
@@ -178,6 +225,14 @@ public class SextantInputHandler : MonoBehaviour
             Vector3 midPoint = (startPos + endPos) * 0.5f;
             Handles.Label(midPoint + Vector3.up * 0.1f, $"Length: {LastDragLength:F2}");
         }
+
+        if (_extensionLineRenderer.enabled && _extensionLineRenderer.positionCount >= 2)
+        {
+            Vector3 extStart = _extensionLineRenderer.GetPosition(0);
+            Vector3 extEnd = _extensionLineRenderer.GetPosition(1);
+            Vector3 extMidPoint = (extStart + extEnd) * 0.5f;
+            Handles.Label(extMidPoint + Vector3.up * 0.1f, $"Ext Length: {LastExtensionLength:F2}");
+        }
     }
 #endif
 
@@ -185,17 +240,20 @@ public class SextantInputHandler : MonoBehaviour
 
     #region Métodos Privados
 
-    private void CalculateImageTopScreenY()
+    private void CalculateImageScreenArea()
     {
         if (_anchorImage == null) return;
 
         Vector3[] corners = new Vector3[4];
         _anchorImage.rectTransform.GetWorldCorners(corners);
 
-        Vector3 topLeftWorld = corners[1];
-        Vector3 topLeftScreen = RectTransformUtility.WorldToScreenPoint(null, topLeftWorld);
+        Vector3 bottomLeftScreen = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
+        Vector3 topRightScreen = RectTransformUtility.WorldToScreenPoint(null, corners[2]);
 
-        _imageTopScreenY = topLeftScreen.y;
+        _imageScreenMin = new Vector2(bottomLeftScreen.x, bottomLeftScreen.y);
+        _imageScreenMax = new Vector2(topRightScreen.x, topRightScreen.y);
+
+        _imageTopScreenY = topRightScreen.y;
     }
 
     private Vector3 GetInputWorldPosition()
@@ -210,6 +268,13 @@ public class SextantInputHandler : MonoBehaviour
     {
         _lineRenderer.SetPosition(0, start);
         _lineRenderer.SetPosition(1, end);
+    }
+
+    private float CalculateLineLength(LineRenderer lr)
+    {
+        if (lr.positionCount >= 2)
+            return Vector3.Distance(lr.GetPosition(0), lr.GetPosition(1));
+        return 0f;
     }
 
     private Vector3 CalculateIntersectionPoint(Vector3 start, Vector3 end)
@@ -233,20 +298,20 @@ public class SextantInputHandler : MonoBehaviour
         {
             _dragStartWorldPos = GetInputWorldPosition();
 
-            Vector3 startScreenPos = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
             _isFrozen = false;
-
             _isDragging = true;
             _lineRenderer.enabled = true;
             _lineRenderer.SetPosition(0, _dragStartWorldPos);
             _lineRenderer.SetPosition(1, _dragStartWorldPos);
             LastDragLength = 0f;
+            LastExtensionLength = 0f;
+            _lastExtensionLengthSerialized = 0f;
         }
     }
 
     private void HandleDragDetected(int sextant)
     {
-        // Puede agregarse lógica adicional si se requiere
+        // Placeholder for extra logic
     }
 
     private void StopDrag()

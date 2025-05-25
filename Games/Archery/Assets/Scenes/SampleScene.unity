@@ -1757,6 +1757,8 @@ MonoBehaviour:
   _anchorImage: {fileID: 343948808}
   _lineRenderer: {fileID: 1508043633}
   _extensionLineRenderer: {fileID: 2114593172}
+  _lastDragLengthSerialized: 0
+  _lastExtensionLengthSerialized: 0
 --- !u!114 &1233718192
 MonoBehaviour:
   m_ObjectHideFlags: 0
